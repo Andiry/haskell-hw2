@@ -179,8 +179,13 @@ change, when we add exceptions and such.
 **Hint:** The value `get` is of type `State Store Store`. Thus, to extract 
 the value of the "current store" in a variable `s` use `s <- get`.
 
-> evalE (Var x)      = error "TBD"
-> evalE (Val v)      = error "TBD" 
+
+> evalE (Var x)      = do
+>		store <- get
+>		case Data.Map.lookup x store of
+>			Just n  -> return n
+>			Nothing -> return $ IntVal 0
+> evalE (Val v)      = return v 
 > evalE (Op o e1 e2) = error "TBD"
 
 
