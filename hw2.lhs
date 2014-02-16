@@ -7,6 +7,7 @@ title: Homework #2, Due Friday 2/24/14
 
 > import Control.Applicative hiding (empty, (<|>))
 > import Data.Map
+> import Data.List
 > import Control.Monad.State hiding (when)
 > import Text.Parsec hiding (State, between)
 > import Text.Parsec.Combinator hiding (between)
@@ -75,12 +76,12 @@ Define the following functions by filling in the "error" portion:
 3. Define `foldr` in terms of `foldl`:
 
 > myFoldr :: (a -> b -> b) -> b -> [a] -> b
-> myFoldr f b xs = error "TBD"
+> myFoldr f b xs = Prelude.foldl (\g b x -> g (f b x)) id xs b
 
 4. Define `foldl` in terms of the standard `foldr` (not `myFoldr`):
 
 > myFoldl2 :: (a -> b -> a) -> a -> [b] -> a
-> myFoldl2 f b xs = error "TBD"
+> myFoldl2 f b xs = Prelude.foldr (\b g x -> g (f x b)) id xs b
 
 5. Try applying `foldl` to a gigantic list. Why is it so slow?
    Try using `foldl'` (from [Data.List](http://www.haskell.org/ghc/docs/latest/html/libraries/base/Data-List.html#3))
