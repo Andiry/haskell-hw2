@@ -50,9 +50,9 @@ Problem 0: All About You
 Tell us your name, email and student ID, by replacing the respective
 strings below
 
-> myName  = "Write Your Name  Here"
-> myEmail = "Write Your Email Here"
-> mySID   = "Write Your SID   Here"
+> myName  = "Jian Xu"
+> myEmail = "jix024@cs.ucsd.edu"
+> mySID   = "A53026658"
 
 
 Problem 1: All About `foldl`
@@ -63,12 +63,14 @@ Define the following functions by filling in the "error" portion:
 1. Describe `foldl` and give an implementation:
 
 > myFoldl :: (a -> b -> a) -> a -> [b] -> a
-> myFoldl f b xs = error "TBD"
+> myFoldl f b (x:xs) = myFoldl f (f b x) xs
+> myFoldl _ b []     = b
 
 2. Using the standard `foldl` (not `myFoldl`), define the list reverse function:
 
 > myReverse :: [a] -> [a]
-> myReverse xs = error "TBD"
+> myReverse xs = Prelude.foldl rev [] xs
+>		 where rev xs x = x:xs 
 
 3. Define `foldr` in terms of `foldl`:
 
