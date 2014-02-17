@@ -216,11 +216,29 @@ evaluating the `Statement`.
 Thus, to "update" the value of the store with the new store `s'` 
 do `put s`.
 
-> evalS w@(While e s)    = error "TBD" 
-> evalS Skip             = error "TBD"
-> evalS (Sequence s1 s2) = error "TBD"
-> evalS (Assign x e )    = error "TBD"
-> evalS (If e s1 s2)     = error "TBD" 
+> evalS w@(While e s)    = do 
+>		val <- evalE(e)
+>		case val of
+>			IntVal _   -> evalS Skip
+>			BoolVal val | val -> evalS s
+>				    | not val -> evalS Skip
+>		evalS $ While e s
+> evalS Skip             = do
+>		store <- get
+>		put store
+> evalS (Sequence s1 s2) = do
+>		evalS s1
+>		evalS s2
+> evalS (Assign x e )    = do
+>		store <- get
+>		val <- evalE(e)
+>		put $ Data.Map.insert x val store
+> evalS (If e s1 s2)     = do 
+>		val <- evalE(e)
+>		case val of
+>			IntVal _   -> evalS Skip
+>			BoolVal val | val -> evalS s1
+>				    | not val -> evalS s2
 
 In the `If` case, if `e` evaluates to a non-boolean value, just skip both
 the branches. (We will convert it into a type error in the next homework.)
