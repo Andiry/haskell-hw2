@@ -225,7 +225,6 @@ do `put s`.
 >					evalS $ While e s
 >				    | not val -> do
 >					evalS Skip
->					evalS $ While e s
 > evalS Skip             = do
 >		store <- get
 >		put store
@@ -278,7 +277,7 @@ Here are a few "tests" that you can use to check your implementation.
 > w_3 = (If (Val (BoolVal True)) (Assign "N" (Val (IntVal 1))) (Assign "F" (Val (IntVal 2))))
 > w_4 = (Assign "N" (Op Gt (Val (BoolVal True)) (Val (IntVal 2))))
 > w_test1 = (Assign "X" (Op Plus (Op Minus (Op Plus (Val (IntVal 1)) (Val (IntVal 2))) (Val (IntVal 3))) (Op Plus (Val (IntVal 1)) (Val (IntVal 3)))))
-> w_test2 = (Sequence (Assign "X" (Val (IntVal 4))) (While (Op Gt (Var "X") (Val (IntVal 0))) (Assign "X" (Op Minus (Var "X") (Val (IntVal 1))))))
+> w_test2 = (Sequence (Assign "X" (Val (IntVal (4)))) (While (Op Gt (Var "X") (Val (IntVal 0))) (Assign "X" (Op Minus (Var "X") (Val (IntVal 1))))))
 
 As you can see, it is rather tedious to write the above tests! They
 correspond to the code in the files `test.imp` and `fact.imp`. When you are
