@@ -220,9 +220,12 @@ do `put s`.
 >		val <- evalE(e)
 >		case val of
 >			IntVal _   -> evalS Skip
->			BoolVal val | val -> evalS s
->				    | not val -> evalS Skip
->		evalS $ While e s
+>			BoolVal val | val -> do
+>					evalS s
+>					evalS $ While e s
+>				    | not val -> do
+>					evalS Skip
+>					evalS $ While e s
 > evalS Skip             = do
 >		store <- get
 >		put store
@@ -245,7 +248,7 @@ the branches. (We will convert it into a type error in the next homework.)
 Finally, write a function 
 
 > execS :: Statement -> Store -> Store
-> execS = error "TBD"
+> execS s = execState $ evalS s
 
 such that `execS stmt store` returns the new `Store` that results
 from evaluating the command `stmt` from the world `store`. 
@@ -269,6 +272,13 @@ Here are a few "tests" that you can use to check your implementation.
 > w_test = (Sequence (Assign "X" (Op Plus (Op Minus (Op Plus (Val (IntVal 1)) (Val (IntVal 2))) (Val (IntVal 3))) (Op Plus (Val (IntVal 1)) (Val (IntVal 3))))) (Sequence (Assign "Y" (Val (IntVal 0))) (While (Op Gt (Var "X") (Val (IntVal 0))) (Sequence (Assign "Y" (Op Plus (Var "Y") (Var "X"))) (Assign "X" (Op Minus (Var "X") (Val (IntVal 1))))))))
 
 > w_fact = (Sequence (Assign "N" (Val (IntVal 2))) (Sequence (Assign "F" (Val (IntVal 1))) (While (Op Gt (Var "N") (Val (IntVal 0))) (Sequence (Assign "X" (Var "N")) (Sequence (Assign "Z" (Var "F")) (Sequence (While (Op Gt (Var "X") (Val (IntVal 1))) (Sequence (Assign "F" (Op Plus (Var "Z") (Var "F"))) (Assign "X" (Op Minus (Var "X") (Val (IntVal 1)))))) (Assign "N" (Op Minus (Var "N") (Val (IntVal 1))))))))))
+
+> w_1 = (Sequence (Assign "N" (Val (IntVal 1))) (Assign "F" (Val (IntVal 2))))
+> w_2 = (Sequence (Skip) (Assign "F" (Val (IntVal 2))))
+> w_3 = (If (Val (BoolVal True)) (Assign "N" (Val (IntVal 1))) (Assign "F" (Val (IntVal 2))))
+> w_4 = (Assign "N" (Op Gt (Val (BoolVal True)) (Val (IntVal 2))))
+> w_test1 = (Assign "X" (Op Plus (Op Minus (Op Plus (Val (IntVal 1)) (Val (IntVal 2))) (Val (IntVal 3))) (Op Plus (Val (IntVal 1)) (Val (IntVal 3)))))
+> w_test2 = (Sequence (Assign "X" (Val (IntVal 4))) (While (Op Gt (Var "X") (Val (IntVal 0))) (Assign "X" (Op Minus (Var "X") (Val (IntVal 1))))))
 
 As you can see, it is rather tedious to write the above tests! They
 correspond to the code in the files `test.imp` and `fact.imp`. When you are
