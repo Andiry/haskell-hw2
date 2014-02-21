@@ -99,7 +99,21 @@ Recall the following type of binary search trees:
 Define a `delete` function for BSTs of this type:
 
 > delete :: (Ord k) => k -> BST k v -> BST k v
-> delete k t = error "TBD"
+> delete _ Emp = Emp
+> delete k (Bind k' v l r) | k < k' = Bind k' v (Hw2.delete k l) r
+> delete k (Bind k' v l r) | k > k' = Bind k' v l (Hw2.delete k r)
+> delete _ (Bind k' v' Emp Emp) = Emp
+> delete _ (Bind k' v' l Emp) = l
+> delete _ (Bind k' v' Emp r) = r
+> delete _ (Bind _ v' l r) = Bind key value l r'
+>	where key = minKey r
+>	      value = minValue r
+>	      r'  = Hw2.delete key r
+>	      minKey (Bind k1 v1 Emp _) = k1 
+>	      minKey (Bind k1 v1 l _) = minKey l
+>	      minValue (Bind k1 v1 Emp _) = v1 
+>	      minValue (Bind k1 v1 l _) = minValue l
+
 
 Part 3: An Interpreter for WHILE 
 ================================
