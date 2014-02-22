@@ -333,25 +333,43 @@ First, we will write parsers for the `Value` type
 To do so, fill in the implementations of
 
 > intP :: Parser Value
-> intP = error "TBD" 
+> intP = do skipMany space
+>	    numStr <- many1 digit
+>	    return (IntVal (read numStr::Int)) 
 
 Next, define a parser that will accept a 
 particular string `s` as a given value `x`
 
 > constP :: String -> a -> Parser a
-> constP s x = error "TBD"
+> constP s x = do skipMany space
+> 		  string s
+> 		  return x
 
 and use the above to define a parser for boolean values 
 where `"true"` and `"false"` should be parsed appropriately.
 
 > boolP :: Parser Value
-> boolP = error "TBD"
+> boolP = try (constP "true" (BoolVal True)) <|>
+>	  try (constP "false" (BoolVal False))
 
 Continue to use the above to parse the binary operators
 
+> mulOp :: Parser Bop
+> mulOp = try (constP "*" Times ) <|>
+>         try (constP "/" Divide)
+
+> addOp :: Parser Bop
+> addOp = try (constP "+" Plus ) <|>
+>         try (constP "-" Minus )
+
+> relOp :: Parser Bop
+> relOp = try (constP ">=" Ge ) <|>
+>         try (constP ">"  Gt ) <|>
+>         try (constP "<=" Le ) <|>
+>         try (constP "<"  Lt )
+
 > opP :: Parser Bop 
-> opP = error "TBD"
- 
+> opP = mulOp <|> addOp <|> relOp
 
 Parsing Expressions 
 -------------------
@@ -360,20 +378,75 @@ Next, the following is a parser for variables, where each
 variable is one-or-more uppercase letters. 
 
 > varP :: Parser Variable
-> varP = many1 upper
+> varP = do skipMany space
+>	    many1 upper
 
 Use the above to write a parser for `Expression` values
 
+> parenP :: Parser a -> Parser a
+> parenP p = do constP "(" ()
+>		x <- p
+>		constP ")" ()
+>		return x
+
+Need to convert relOp addOp and mulOp to expression fmap f z = do x <- z return f x
+
 > exprP :: Parser Expression
-> exprP = error "TBD"
+> exprP = exprP2 `chainl1` (Op `fmap` relOp)
+>
+> exprP2 :: Parser Expression
+> exprP2 = exprP3 `chainl1` (Op `fmap` addOp)
+>
+> exprP3 :: Parser Expression
+> exprP3 = factorE `chainl1` (Op `fmap` mulOp)
+>
+> factorE :: Parser Expression
+> factorE = try (Var `fmap` varP) <|> try (Val `fmap` valueP) <|> try (parenP exprP)
 
 Parsing Statements
 ------------------
 
 Next, use the expression parsers to build a statement parser
 
+> assignStt :: Parser Statement
+> assignStt = do varParser <- varP
+>		 constP ":=" ()
+>		 exp <- exprP
+>		 return $ Assign varParser exp
+>
+> ifStt :: Parser Statement
+> ifStt = do constP "if" ()
+>	     exp <- exprP
+>	     constP "then" ()
+>	     stt1 <- statementP
+>	     constP "else" ()
+>	     stt2 <- statementP
+>	     constP "endif" ()
+>	     return $ If exp stt1 stt2
+>
+> whileStt :: Parser Statement
+> whileStt = do constP "while" ()
+>		exp <- exprP
+>		constP "do" ()
+>		stt <- statementP
+>		constP "endwhile" ()
+>		return $ While exp stt
+>
+> semiColon :: Parser (Statement -> Statement -> Statement)
+> semiColon = try (constP ";" ()) >> return Sequence
+>
+> seqStt :: Parser Statement
+> seqStt = seqStP `chainl1` semiColon
+>
+> skipStt :: Parser Statement
+> skipStt = constP "skip" Skip
+>
+> seqStP :: Parser Statement
+> seqStP = try (ifStt) <|> try (whileStt) <|> try (assignStt) <|> skipStt
+
 > statementP :: Parser Statement
-> statementP = error "TBD" 
+> statementP = do s <- seqStt
+>		  return s
 
 When you are done, we can put the parser and evaluator together 
 in the end-to-end interpreter function
