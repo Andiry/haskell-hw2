@@ -87,6 +87,18 @@ Define the following functions by filling in the "error" portion:
    Try using `foldl'` (from [Data.List](http://www.haskell.org/ghc/docs/latest/html/libraries/base/Data-List.html#3))
    instead; can you explain why it's faster?
 
+Answer: foldl uses lazy reduction strategy: expression are reduced only when
+	they are actually needed for calculation. That is to say, when applying
+	foldl to a big list, foldl will create a bunch of intermediate
+	variables, but not actually compute them until all the foldl are
+	completely gone. During the redexes creation, they are allocated on heap
+	which adds additional overhead. After all foldl are gone, it begins the
+	real computation by pushing the items to the stack to do the reduction.
+
+	For foldl', inner redex are reduced before the outer, so that it does
+	not store intermediate computations. There is no heap allocation and no
+	intermediate variables created. That's why it's faster than foldl.
+
 Part 2: Binary Search Trees
 ===========================
 
