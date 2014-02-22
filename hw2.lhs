@@ -113,6 +113,16 @@ Define a `delete` function for BSTs of this type:
 >	      minKey (Bind k1 v1 l _) = minKey l
 >	      minValue (Bind k1 v1 Emp _) = v1 
 >	      minValue (Bind k1 v1 l _) = minValue l
+>
+> insert k v Emp = Bind k v Emp Emp
+> insert k v (Bind k' v' l r)
+>   | k > k'       = Bind k' v' l (Hw2.insert k v r)
+>   | k < k'       = Bind k' v' (Hw2.insert k v l) r
+>   | otherwise    = Bind k v l r
+>
+> t0 = Hw2.insert 2     "test"  Emp
+> t1 = Hw2.insert 4     "name"  t0
+> t2 = Hw2.insert 1     "hello"  t1
 
 
 Part 3: An Interpreter for WHILE 
