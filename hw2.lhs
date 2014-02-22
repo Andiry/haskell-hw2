@@ -249,9 +249,7 @@ do `put s`.
 >					evalS $ While e s
 >				    | not val -> do
 >					evalS Skip
-> evalS Skip             = do
->		store <- get
->		put store
+> evalS Skip             = return ()
 > evalS (Sequence s1 s2) = do
 >		evalS s1
 >		evalS s2
